@@ -9,9 +9,16 @@ import requests
 
 from lxml import etree
 from selenium import webdriver
-
+#
 # driver = webdriver.Chrome()
-
+#
+# def get_first_page(url):
+#     driver.get(url)
+#     html = driver.page_source
+#     time.sleep(1)
+#     return html
+# 爬虫会有请求阻塞的问题！
+# 也有可能是请求的页面是没有数据的！所以！即使收手！
 
 def call_page(url):
     try:
@@ -69,7 +76,7 @@ def Python_sel_Mysql():
                                  charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
     cur = connection.cursor()
     #sql 语句
-    for i in range(1,4736):
+    for i in range(2070,4736):
         sql = 'select link_finan from les_coding where id = %s ' % i
         # #执行sql语句
         cur.execute(sql)
