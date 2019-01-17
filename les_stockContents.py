@@ -18,7 +18,7 @@ from selenium import webdriver
 #     time.sleep(1)
 #     return html
 # 爬虫会有请求阻塞的问题！
-# 也有可能是请求的页面是没有数据的！所以！即使收手！
+# 也有可能是请求的页面是没有数据的！所以！即使收手！web
 
 def call_page(url):
     try:
