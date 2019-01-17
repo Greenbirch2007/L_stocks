@@ -23,7 +23,7 @@ stock_Cash = (0.6) *total_Cash
 FX_price = 1.2856
 index_Future_N = int(index_Cash/3587)  # 向下取整
 index_cost = 6830
-stock_cost = 45
+stock_cost = 2550
 
 # 2019.1.17 远兴能源——————FTFE100指数模型测试
 
@@ -50,19 +50,19 @@ def get_index_PL():
         pass
 
 
-# 远兴能源
+# CRANEWARE
 def get_stocks_PL():
-    url = 'https://www.londonstockexchange.com/exchange/prices-and-markets/stocks/summary/company-summary/GB00BCDBXK43GBGBXASX1.html'
+    url = 'https://www.londonstockexchange.com/exchange/prices-and-markets/stocks/summary/company-summary/GB00B2425G68GBGBXASQ1.html'
     headers = {'Useragent': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; GTB7.0'}
     response = requests.get(url, headers=headers)
     content = response.text
     selector = etree.HTML(content)
     price = selector.xpath('//*[@id="pi-colonna1-display"]/div[1]/table/tbody/tr[1]/td[2]/text()')
-    for items in price:
-        stock_PL = ((float(items) -stock_cost) /stock_cost) * stock_Cash # 直接用英镑算出盈亏比率,然后直接套用股票总资金即可
+    for items in price:  # 要把2,66.0的价格进行一次分隔然后拼接
+        f_price = "".join(items.split(','))
+        stock_PL = ((float(f_price) -stock_cost) /stock_cost) * stock_Cash # 直接用英镑算出盈亏比率,然后直接套用股票总资金即可
 
         stock_PL_2 = round(stock_PL, 2)
-        print(stock_PL_2)
         big_list.append(stock_PL_2)
 
 
@@ -90,7 +90,7 @@ def insertDB(content):
     # 这里是判断big_list的长度，不是content字符的长度
     if len(big_list) == 4:
         cursor.executemany(
-            'insert into A50_OneStock_PL (index_PL,stock_PL,profilo_PL,profilo_PL_R) values (%s,%s,%s,%s)', content)
+            'insert into oneStock_FTSE100_PL (index_PL,stock_PL,profilo_PL,profilo_PL_R) values (%s,%s,%s,%s)', content)
         connection.commit()
         connection.close()
         print('向MySQL中添加数据成功！')
@@ -111,11 +111,10 @@ if __name__ == '__main__':
         l_tuple = tuple(big_list)
         content = []
         content.append(l_tuple)
-        print(content)
-        # insertDB(content)
-        # time.sleep(6)
+        insertDB(content)
+        time.sleep(3)
 
-# create table A50_OneStock_PL(
+# create table oneStock_FTSE100_PL(
 # id int not null primary key auto_increment,
 # index_PL varchar(10),
 # stock_PL varchar(10),
@@ -123,4 +122,4 @@ if __name__ == '__main__':
 # profilo_PL_R varchar(10)
 # ) engine=InnoDB  charset=utf8;
 
-# drop table A50_OneStock_PL;
+# drop table oneStock_FTSE100_PL;
