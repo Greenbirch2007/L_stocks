@@ -74,10 +74,10 @@ def profilo_PL():
         profilo_PL_2 = round(profilo_PL, 2)
         big_list.append(profilo_PL_2)
         total_profit_R = profilo_PL_2 / total_Cash
-        # total_profit_R_2 = '%.2f%%' % (total_profit_R * 100)  这个是为加上　％
-        total_profit_R_2 = round(total_profit_R, 3)   # 这个最简单
+        total_profit_R_100 = total_profit_R *100 # 先换算成100进制
+        total_profit_R_3 = round(total_profit_R_100, 3)   # 再保留3位数
 
-        big_list.append(total_profit_R_2)
+        big_list.append(total_profit_R_3)
 
     except IndexError as e:
         print(e)
