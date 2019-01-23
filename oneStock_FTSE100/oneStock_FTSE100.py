@@ -1,6 +1,8 @@
 
 # ! -*- coding:utf-8 -*-
 
+# 2019.1.23  模型重新梳理，一次PL汇率换算，加上了手数的因素
+
 import time
 import re
 import pymysql
@@ -11,21 +13,24 @@ from selenium import webdriver
 import datetime
 import string
 
+from math import floor
+
+
 # 暂时没有找到洲际交易所的FTFE100好的数据源，官网行不通．所以这里直接用lse的官网的
 # 的股票指数代替,这样在windows下也可以去跑脚本了
 # 数据延迟，糟心！　算了就做一个定向统计即可
 # 欧洲股票本来成交就相当的清淡,所以30秒钟请求一次即可!
 
 # 测试3万美元
-total_Cash = 30000
-index_Cash = (0.3) * total_Cash
+total_Cash = 30000 #初始资金是3完美元
+index_Cash = (0.3) * total_Cash # index部位直接是美元，计算手数时不用进行汇率换算
 stock_Cash = (0.6) *total_Cash
 FX_price = 1.2856
-index_Future_N = int(index_Cash/3587)  # 向下取整
+index_Future_N =  floor(index_Cash/3587) # 向下取整
 index_cost = 6830
 stock_cost = 2550
 
-# 2019.1.17 远兴能源——————FTFE100指数模型测试
+# 2019.1.17  个股——————FTFE100指数模型测试
 
 
 def get_index_PL():
@@ -42,7 +47,7 @@ def get_index_PL():
         items = re.findall(patt, html)
         for item in items:
             items_float = float(item)
-            indexF_PL = (index_cost-items_float)*10*FX_price  # 每点10英镑,最后转化为美元
+            indexF_PL = (index_cost-items_float)*10*FX_price*index_Future_N # 点差，乘以每点10英镑，再乘以汇率换算成美元，再乘以手数
             indexF_PL_2 = round(indexF_PL,2)
             big_list.append(str(indexF_PL_2))
             driver.quit()
@@ -60,7 +65,7 @@ def get_stocks_PL():
     price = selector.xpath('//*[@id="pi-colonna1-display"]/div[1]/table/tbody/tr[1]/td[2]/text()')
     for items in price:  # 要把2,66.0的价格进行一次分隔然后拼接
         f_price = "".join(items.split(','))
-        stock_PL = ((float(f_price) -stock_cost) /stock_cost) * stock_Cash # 直接用英镑算出盈亏比率,然后直接套用股票总资金即可
+        stock_PL = ((float(f_price) -stock_cost) /stock_cost) * stock_Cash # 直接用股价算出盈亏比率,然后直接套用股票总资金即可，还是美元
 
         stock_PL_2 = round(stock_PL, 2)
         big_list.append(stock_PL_2)
@@ -113,7 +118,7 @@ if __name__ == '__main__':
         content.append(l_tuple)
         insertDB(content)
         time.sleep(3)
-
+#
 # create table oneStock_FTSE100_PL(
 # id int not null primary key auto_increment,
 # index_PL varchar(10),
